@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components'
+import { DicesContext } from "../DicesProvider";
 
 
 const DiceStyle = styled.div`
@@ -11,52 +12,39 @@ border-radius:5px;
 width:30px;
 height:30px;
 margin:5px;
-background-color: ${props => props.Hold ? `green` : `white`};
+background-color: ${props => props.Hold ? `green` : `orange`};
 cursor:pointer;
 `
 
 
-const Dice = ({ rolls }) => {
-    const [Hold, setHold] = useState(false)
-    const [roll, setroll] = useState(rolls)
-
-    useEffect(() => {
-        Hold ? setroll(roll) : setroll(rolls)
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rolls, roll])
+const Dice = ({ rolls, hold }) => {
     return (
-        <DiceStyle Hold={Hold} onClick={() => (setHold(!Hold))}>{roll}</DiceStyle>
+        <DiceStyle hold={hold}>{rolls}</DiceStyle>
     )
 
 }
 
-
-const Dices = () => {
-    const [rolls, setrolls] = useState([0])
-    const [rollSum, setrollSum] = useState(0)
-
-    const diceRoll = () => {
-        let rolls = [];
-        let rollSum = 0;
-        for (let i = 0; i < 6; i++) {
-            rolls[i] = Math.floor(Math.random() * 6) + 1;
-            rollSum += rolls[i];
-        }
-        setrolls(rolls)
-        setrollSum(rollSum)
-
-    };
+const diceRoll = (x, setRolls, GetData) => {
+    let roll = [GetData];
+    for (let i = 0; i < x; i++) {
+        roll[i] = {
+            Roll: Math.floor(Math.random() * x) + 1,
+            hold: false
+        };
+    }
+    setRolls(roll)
+};
 
 
+const Dices = ({ NumberOfDices }) => {
+    const { GetData, setGetData } = useContext(DicesContext);
     return (
         <>
-            <button onClick={diceRoll}>Rolle Dice</button>
-            {rolls.map((rolls) => (
-                <Dice rolls={rolls} />
+            <button onClick={() => diceRoll(NumberOfDices, setGetData, GetData)}>Rolle Dice</button>
+            {GetData.map(({ Roll, hold, id }) => (
+                <Dice rolls={Roll} hold={hold} key={id} />
             ))}
 
-            <p>Totalt {rollSum}</p>
         </>
     );
 }
